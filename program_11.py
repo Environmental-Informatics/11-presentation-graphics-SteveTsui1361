@@ -8,17 +8,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdate
 
+# Read data that used to this analysis
 def ReadData( fileName ):
-    """This function takes a filename as input, and returns a dataframe with
-    raw data read from that file in a Pandas DataFrame.  The DataFrame index
-    should be the year, month and day of the observation.  DataFrame headers
-    should be "agency_cd", "site_no", "Date", "Discharge", "Quality". The 
-    "Date" column should be used as the DataFrame index. The pandas read_csv
-    function will automatically replace missing values with np.NaN, but needs
-    help identifying other flags used by the USGS to indicate no data is 
-    availabiel.  Function returns the completed DataFrame, and a dictionary 
-    designed to contain all missing value counts that is initialized with
-    days missing between the first and last date of the file."""
     
     # define column names
     colNames = ['agency_cd', 'site_no', 'Date', 'Discharge', 'Quality']
@@ -33,9 +24,9 @@ def ReadData( fileName ):
     DataDF['Discharge'] = DataDF['Discharge'].mask(DataDF['Discharge']<0, np.nan)
     
     # quantify the number of missing values
-    #MissingValues = DataDF["Discharge"].isna().sum()
+    MissingValues = DataDF["Discharge"].isna().sum()
     
-    return( DataDF)
+    return( DataDF, MissingValues)
 
 def ClipData( DataDF, startDate, endDate ):
     """This function clips the given time series dataframe to a given range 
@@ -48,9 +39,9 @@ def ClipData( DataDF, startDate, endDate ):
     DataDF = DataDF.loc[mask]
     
     # quantify the number of missing values
-    #MissingValues = DataDF["Discharge"].isna().sum()
+    MissingValues = DataDF["Discharge"].isna().sum()
     
-    return( DataDF )
+    return( DataDF, MissingValues)
 
 def ReadMetrics( fileName ):
     """This function takes a filename as input, and returns a dataframe with
@@ -60,7 +51,7 @@ def ReadMetrics( fileName ):
     returns the completed DataFrame."""
     
     # open and read the file
-    DataDF = pd.read_csv(fileName)
+    DataDF = pd.read_csv(fileName, header=0, delimiter=',', parse_dates=['Date'])
     DataDF = DataDF.set_index('Date')
     
     return( DataDF )
@@ -87,15 +78,16 @@ if __name__ == '__main__':
     
     # define blank dictionaries (these will use the same keys as fileName)
     DataDF = {}
+    MissingValues = {}
     #MissingValues = {}
     
     
     for file in fileName.keys():
         
-        DataDF[file] = ReadData(fileName[file])
+        DataDF[file], MissingValues[file] = ReadData(fileName[file])
         
         # clip to consistent period
-        DataDF[file] = ClipData( DataDF[file], '2014-10-01', '2019-09-30' )
+        DataDF[file], MissingValues[file] = ClipData( DataDF[file], '2014-10-01', '2019-09-30' )
             
         #print(DataDF[file].head())
             
@@ -126,6 +118,8 @@ if __name__ == '__main__':
     plt.title('TQmean')
     plt.ylabel('TQmean')
     plt.xlabel('Time')
+    ax=plt.gca()
+    ax.set_xticklabels(np.arange(1969, 2019, 10))
     plt.savefig('TQmean.png', dpi=96)
     plt.show()
     
@@ -133,9 +127,11 @@ if __name__ == '__main__':
     for name, data in Annual_Wildcat:
         plt.plot(data.index.values, data['Coeff Var'].values, label=riverName[name], color=color[name])
     plt.legend()
-    plt.title('Coefficient Variation')
-    plt.ylabel('Coefficient Vaviation')
+    plt.title('Coefficient of Variation')
+    plt.ylabel('Coefficient of Vaviation')
     plt.xlabel('Time')
+    ax=plt.gca()
+    ax.set_xticklabels(np.arange(1969, 2019, 10))
     plt.savefig('Coeff_Var.png', dpi=96)
     plt.show()
     
@@ -146,6 +142,8 @@ if __name__ == '__main__':
     plt.title('R-B Index')
     plt.ylabel('R-B Index')
     plt.xlabel('Time')
+    ax=plt.gca()
+    ax.set_xticklabels(np.arange(1969, 2019, 10))
     plt.savefig('R-B_Index.png', dpi=96)
     plt.show()
    
