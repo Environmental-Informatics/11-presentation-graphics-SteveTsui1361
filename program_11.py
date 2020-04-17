@@ -6,6 +6,7 @@ import pandas as pd
 import scipy.stats as stats
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdate
 
 def ReadData( fileName ):
     """This function takes a filename as input, and returns a dataframe with
@@ -119,8 +120,11 @@ if __name__ == '__main__':
     for name, data in Annual_Wildcat:
         plt.plot(data.index.values, data.TQmean.values, label=riverName[name], color=color[name])
     plt.legend()
+    #plt.gca().xaxis_date()
+    #plt.gca().xaxis.set_major_formatter(mdate.DateFormatter('%Y/%m/%d'))
+    #plt.tight_layout()
     plt.title('TQmean')
-    #plt.ylabel('Discharge (cfs)')
+    plt.ylabel('TQmean')
     plt.xlabel('Time')
     plt.savefig('TQmean.png', dpi=96)
     plt.show()
@@ -130,7 +134,7 @@ if __name__ == '__main__':
         plt.plot(data.index.values, data['Coeff Var'].values, label=riverName[name], color=color[name])
     plt.legend()
     plt.title('Coefficient Variation')
-    #plt.ylabel('Discharge (cfs)')
+    plt.ylabel('Coefficient Vaviation')
     plt.xlabel('Time')
     plt.savefig('Coeff_Var.png', dpi=96)
     plt.show()
@@ -140,7 +144,7 @@ if __name__ == '__main__':
         plt.plot(data.index.values, data['R-B Index'].values, label=riverName[name], color=color[name])
     plt.legend()
     plt.title('R-B Index')
-    #plt.ylabel('Discharge (cfs)')
+    plt.ylabel('R-B Index')
     plt.xlabel('Time')
     plt.savefig('R-B_Index.png', dpi=96)
     plt.show()
@@ -202,7 +206,6 @@ if __name__ == '__main__':
     plt.ylabel('Peak Discharge (cfs)')
     plt.xlabel('Exceedance Probability (%)')
     plt.xticks(range(0,100,5))
-    plt.tight_layout()
     plt.savefig('Exceed_prob.png', dpi=96)
     plt.show()
     plt.rcParams.update({'font.size':30})
